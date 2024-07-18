@@ -185,10 +185,10 @@ module.exports = {
 
       return res.json({
         success: true,
-        countThisWeek,
-        sumMoneyThisWeek,
+        countOrders: countThisWeek,
+        sumMoneyInDateRange: sumMoneyThisWeek,
         growthRate,
-        totalNewAccountsThisWeek,
+        totalNewAccountsInDateRange: totalNewAccountsThisWeek,
       });
     } catch (error) {
       return next(createError(res, 500, error.message));
