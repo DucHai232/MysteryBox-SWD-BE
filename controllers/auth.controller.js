@@ -11,23 +11,24 @@ module.exports = {
       const user = await db.User.findOne({
         where: { username: body.username },
       });
-      if (user) {
-        return next(createError(res, 401, "User already exists"));
-      }
-      if (user && user.phone === body.phone) {
+      const checkPhone = await db.User.findOne({
+        where: { phone: body.phone },
+      });
+      if (checkPhone) {
         return next(
           createError(res, 401, "This phone number is already in use")
         );
       }
+      if (user) {
+        return next(createError(res, 401, "User already exists"));
+      }
 
       const newUser = await db.User.create({ ...body, password: hashPassword });
-      return res
-        .status(201)
-        .json({
-          success: true,
-          message: "Sign Up Successfully",
-          user: newUser,
-        });
+      return res.status(201).json({
+        success: true,
+        message: "Sign Up Successfully",
+        user: newUser,
+      });
     } catch (error) {
       return next(createError(res, 500, error.message));
     }
