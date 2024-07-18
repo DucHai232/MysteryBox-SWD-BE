@@ -156,6 +156,14 @@ module.exports = {
         },
       });
 
+      const newAccountsThisWeek = await db.User.findAll({
+        where: {
+          createdAt: {
+            [Op.between]: [startOfWeek, endOfWeek],
+          },
+        },
+      });
+
       let countThisWeek = ordersThisWeek.length;
       let sumMoneyThisWeek = ordersThisWeek.reduce((sum, order) => {
         const totalPrice = parseFloat(order.totalPrice.replace(/,/g, "")) || 0;
@@ -173,21 +181,17 @@ module.exports = {
           ((sumMoneyThisWeek - sumMoneyLastWeek) / sumMoneyLastWeek) * 100;
       }
 
+      let totalNewAccountsThisWeek = newAccountsThisWeek.length;
+
       return res.json({
         success: true,
         countThisWeek,
         sumMoneyThisWeek,
         growthRate,
+        totalNewAccountsThisWeek,
       });
     } catch (error) {
-      console.error("Error in revenueWeekDashboard:", error);
-      return next(
-        createError(
-          res,
-          500,
-          "An error occurred while calculating revenue. Please try again later."
-        )
-      );
+      return next(createError(res, 500, error.message));
     }
   },
   revenueMontthDashboard: async (req, res, next) => {
