@@ -190,4 +190,59 @@ module.exports = {
       );
     }
   },
+  revenueMontthDashboard: async (req, res, next) => {
+    try {
+      const { month } = req.params;
+      const startOfMonth = moment(month, "MM").startOf("month").toDate();
+      const endOfMonth = moment(month, "MM").endOf("month").toDate();
+
+      const weeks = [];
+      let currentWeekStart = startOfMonth;
+
+      while (currentWeekStart <= endOfMonth) {
+        const currentWeekEnd = moment(currentWeekStart).endOf("week").toDate();
+        weeks.push({
+          start: currentWeekStart,
+          end: currentWeekEnd > endOfMonth ? endOfMonth : currentWeekEnd,
+        });
+        currentWeekStart = moment(currentWeekStart)
+          .add(1, "weeks")
+          .startOf("week")
+          .toDate();
+      }
+
+      const revenues = await Promise.all(
+        weeks.map(async (week, index) => {
+          const orders = await db.PackageOrder.findAll({
+            where: {
+              createdAt: {
+                [Op.between]: [week.start, week.end],
+              },
+            },
+          });
+
+          const sumMoney = orders.reduce((sum, order) => {
+            const totalPrice =
+              parseFloat(order.totalPrice.replace(/,/g, "")) || 0;
+            return sum + totalPrice;
+          }, 0);
+
+          return {
+            [`week${index + 1}`]: sumMoney,
+          };
+        })
+      );
+
+      const data = revenues.reduce((result, weekData) => {
+        return { ...result, ...weekData };
+      }, {});
+
+      return res.json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      return next(createError(res, 500, error.message));
+    }
+  },
 };

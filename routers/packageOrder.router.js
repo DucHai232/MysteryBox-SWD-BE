@@ -39,4 +39,8 @@ router.get(
 );
 
 router.get("/revenue-week", PackageOrderController.revenueWeekDashboard);
+router.get(
+  "/revenue-month/:month",
+  PackageOrderController.revenueMontthDashboard
+);
 module.exports = router;
