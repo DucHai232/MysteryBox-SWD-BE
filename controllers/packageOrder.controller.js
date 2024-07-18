@@ -67,13 +67,16 @@ module.exports = {
       const kidIds = kidProfiles
         .filter((kidProfile) => kidProfile.userId === user.userId)
         .map((kidProfile) => kidProfile.id);
+
       const packageOrders = await db.PackageOrder.findAll({
         where: {
           kidId: {
             [db.Sequelize.Op.in]: kidIds,
           },
         },
+        order: [["updatedAt", "DESC"]],
       });
+
       return res.json({
         success: true,
         message: "Get data success",
