@@ -22,6 +22,30 @@ module.exports = {
     }
   },
 
+  updateStatus: async (req, res, next) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const allowedStatuses = ["Pending", "Cancel", "Finished"];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+
+    try {
+      const packageOrder = await db.PackageOrder.findByPk(id);
+
+      if (!packageOrder) {
+        return res.status(404).json({ error: "PackageOrder not found" });
+      }
+
+      packageOrder.status = status;
+      await packageOrder.save();
+
+      return res.status(200).json({ message: "Status updated successfully" });
+    } catch (error) {
+      return next(createError(res, 500, error.message));
+    }
+  },
+
   getPackageOrderByIdPk: async (req, res, next) => {
     try {
       const packageOrderId = req.params.id;

@@ -11,17 +11,23 @@ module.exports = {
       const user = await db.User.findOne({
         where: { username: body.username },
       });
-      if (user && user.phone === body.phone) {
-        return next(createError(res, 401, "Số điện thoại này đã sử dụng"));
-      }
       if (user) {
-        return next(createError(res, 401, "Nguời dùng đã tồn tại"));
+        return next(createError(res, 401, "User already exists"));
+      }
+      if (user && user.phone === body.phone) {
+        return next(
+          createError(res, 401, "This phone number is already in use")
+        );
       }
 
       const newUser = await db.User.create({ ...body, password: hashPassword });
       return res
         .status(201)
-        .json({ success: true, message: "Đăng ký thành công", user: newUser });
+        .json({
+          success: true,
+          message: "Sign Up Successfully",
+          user: newUser,
+        });
     } catch (error) {
       return next(createError(res, 500, error.message));
     }
@@ -33,19 +39,17 @@ module.exports = {
         where: { username: body.username },
       });
       if (!user) {
-        return next(createError(res, 401, "Nguời dùng không tồn tại"));
+        return next(createError(res, 401, "User already exists"));
       }
       const comparePassword = bcrypt.compareSync(body.password, user.password);
       if (!comparePassword)
-        return next(
-          createError(res, 401, "Mật khẩu hoặc tài khoản không đúng")
-        );
+        return next(createError(res, 401, "Password or account is incorrect"));
       const isBanned = await db.User.findOne({
         where: { username: body.username, status: false },
       });
       if (isBanned)
         return next(
-          createError(res, 403, "Tài khoản của bạn bị chặn bởi quản trị viên")
+          createError(res, 403, "Your account is blocked by the administrator")
         );
       const token = jwt.sign(
         { userId: user.id, role: user.role },
@@ -55,7 +59,7 @@ module.exports = {
       const { password, ...otherDetails } = user.toJSON();
       return res.json({
         success: true,
-        message: "Đăng nhập thành công",
+        message: "Login successfully",
         accessToken: token,
         user: otherDetails,
       });

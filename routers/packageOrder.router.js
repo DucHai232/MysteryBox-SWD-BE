@@ -9,6 +9,12 @@ router.post(
   PackageOrderController.orderPackage
 );
 
+router.patch(
+  "/update-status/:id",
+  verify.verifyToken,
+  PackageOrderController.updateStatus
+);
+
 router.get(
   "/get-packageorderbyuserid",
   verify.verifyToken,
@@ -36,8 +42,8 @@ router.get(
 
 router.post(
   "/get-order-by-date",
-  // verify.verifyToken,
-  // verify.isStaff,
+  verify.verifyToken,
+  verify.isStaff,
   PackageOrderController.getOrderByDate
 );
 router.get(
