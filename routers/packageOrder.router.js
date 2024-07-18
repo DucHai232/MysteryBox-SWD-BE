@@ -39,6 +39,7 @@ router.get(
 );
 
 router.get("/revenue-week", PackageOrderController.revenueWeekDashboard);
+router.post("/revenue-date", PackageOrderController.revenueDateDashboard);
 router.get(
   "/revenue-month/:month",
   PackageOrderController.revenueMontthDashboard

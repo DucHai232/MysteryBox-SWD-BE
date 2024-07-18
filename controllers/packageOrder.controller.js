@@ -194,6 +194,53 @@ module.exports = {
       return next(createError(res, 500, error.message));
     }
   },
+  revenueDateDashboard: async (req, res, next) => {
+    try {
+      const { startDate, endDate } = req.body;
+
+      if (!startDate || !endDate) {
+        return next(
+          createError(400, "Both startDate and endDate are required.")
+        );
+      }
+
+      const start = moment(startDate, "YYYY-MM-DD").startOf("day").toDate();
+      const end = moment(endDate, "YYYY-MM-DD").endOf("day").toDate();
+
+      const ordersInDateRange = await db.PackageOrder.findAll({
+        where: {
+          createdAt: {
+            [Op.between]: [start, end],
+          },
+        },
+      });
+
+      const newAccountsInDateRange = await db.User.findAll({
+        where: {
+          createdAt: {
+            [Op.between]: [start, end],
+          },
+        },
+      });
+
+      let countOrders = ordersInDateRange.length;
+      let sumMoneyInDateRange = ordersInDateRange.reduce((sum, order) => {
+        const totalPrice = parseFloat(order.totalPrice.replace(/,/g, "")) || 0;
+        return sum + totalPrice;
+      }, 0);
+
+      let totalNewAccountsInDateRange = newAccountsInDateRange.length;
+
+      return res.json({
+        success: true,
+        countOrders,
+        sumMoneyInDateRange,
+        totalNewAccountsInDateRange,
+      });
+    } catch (error) {
+      return next(createError(res, 500, error.message));
+    }
+  },
   revenueMontthDashboard: async (req, res, next) => {
     try {
       const { month } = req.params;
