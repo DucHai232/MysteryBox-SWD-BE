@@ -33,6 +33,13 @@ router.get(
   verify.isStaff,
   PackageOrderController.getAllOrder
 );
+
+router.post(
+  "/get-order-by-date",
+  // verify.verifyToken,
+  // verify.isStaff,
+  PackageOrderController.getOrderByDate
+);
 router.get(
   "/push-product-order/:packageOrderId",
   PackageOrderController.pushProductOrder

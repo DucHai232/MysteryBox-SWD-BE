@@ -69,6 +69,50 @@ module.exports = {
     }
   },
 
+  getOrderByDate: async (req, res, next) => {
+    try {
+      const { startDate, endDate } = req.body;
+
+      let whereCondition = {};
+      if (startDate && endDate) {
+        const start = moment(startDate, "YYYY-MM-DD").startOf("day").toDate();
+        const end = moment(endDate, "YYYY-MM-DD").endOf("day").toDate();
+
+        whereCondition = {
+          createdAt: {
+            [Op.between]: [start, end],
+          },
+        };
+      }
+
+      const orders = await db.PackageOrder.findAll({
+        where: whereCondition,
+      });
+      const packageIds = orders.map((order) => order.packageId);
+      const packages = await db.Package.findAll({
+        where: {
+          id: {
+            [Op.in]: packageIds,
+          },
+        },
+      });
+      const packageMap = packages.reduce((acc, pkg) => {
+        acc[pkg.id] = pkg;
+        return acc;
+      }, {});
+      const ordersWithPackage = orders.map((order) => {
+        return {
+          ...order.toJSON(),
+          package: packageMap[order.packageId] || null,
+        };
+      });
+
+      return res.json({ success: true, orders: ordersWithPackage });
+    } catch (error) {
+      return next(createError(res, 500, error.message));
+    }
+  },
+
   pushPackageInPeriod: async (req, res, next) => {
     try {
       const packageOrderId = req.params.id;
