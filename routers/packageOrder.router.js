@@ -51,10 +51,22 @@ router.get(
   PackageOrderController.pushProductOrder
 );
 
-router.get("/revenue-week", PackageOrderController.revenueWeekDashboard);
-router.post("/revenue-date", PackageOrderController.revenueDateDashboard);
+router.get(
+  "/revenue-week",
+  verify.verifyToken,
+  verify.isAdmin,
+  PackageOrderController.revenueWeekDashboard
+);
+router.post(
+  "/revenue-date",
+  verify.verifyToken,
+  verify.isAdmin,
+  PackageOrderController.revenueDateDashboard
+);
 router.get(
   "/revenue-month/:month",
+  verify.verifyToken,
+  verify.isAdmin,
   PackageOrderController.revenueMontthDashboard
 );
 module.exports = router;

@@ -3,7 +3,12 @@ const PackageController = require("../controllers/package.controller");
 const verify = require("../middlewares/verifyToken");
 const router = express.Router();
 
-router.post("/create-package", PackageController.createPackge);
+router.post(
+  "/create-package",
+  verify.verifyToken,
+  verify.isStaff,
+  PackageController.createPackge
+);
 
 router.get("/get-package", PackageController.getPackages);
 router.patch(
