@@ -60,7 +60,8 @@ module.exports = {
       return res.json({
         success: true,
         message: "Get Data Success",
-        mysteryBoxs: filterBoxByAge.length > 0 ? filterBoxByAge : mysteryBoxs,
+        mysteryBoxs:
+          filterBoxByAge.length > 0 ? filterBoxByAge : filterBoxByThemeId,
       });
     } catch (error) {
       return next(createError(res, 500, error.message));
